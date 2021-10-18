@@ -1,4 +1,7 @@
 <?php
+/**
+ * Sumber : https://tugasakhir.id/contoh-perhitungan-spk-metode-topsis/
+ */
 
 /** Data */
 $kriteria = [
@@ -68,69 +71,52 @@ $alternatif = [
 /** Normalisasi */
 $resAlternatif = [];
 foreach($alternatif as $rAlternatif){
-	$resAlternatif[] = [
+	$arrAlternatif = [
 		'kode' => $rAlternatif['kode'],
 		'nama' => $rAlternatif['nama'],
-		'c01' => ($rAlternatif['c01'] ** 2),
-		'c02' => ($rAlternatif['c02'] ** 2),
-		'c03' => ($rAlternatif['c03'] ** 2),
-		'c04' => ($rAlternatif['c04'] ** 2),
-		'c05' => ($rAlternatif['c05'] ** 2),
 	];
+	foreach($kriteria as $rKriteria){
+		$arrAlternatif[$rKriteria['kode']] = ($rAlternatif[$rKriteria['kode']] ** 2);
+	}
+	$resAlternatif[] = $arrAlternatif;
 }
 
-$totalAlternatif = [
-	'c01' => array_sum(array_column($resAlternatif,'c01')),
-	'c02' => array_sum(array_column($resAlternatif,'c02')),
-	'c03' => array_sum(array_column($resAlternatif,'c03')),
-	'c04' => array_sum(array_column($resAlternatif,'c04')),
-	'c05' => array_sum(array_column($resAlternatif,'c05')),
-];
+foreach($kriteria as $rKriteria){
+	$totalAlternatif[$rKriteria['kode']] = array_sum(array_column($resAlternatif,$rKriteria['kode']));
+}
 
 $normalisasi = [];
 foreach($alternatif as $rAlternatif){
-	$normalisasi[] = [
+	$arrNormalisasi = [
 		'kode' => $rAlternatif['kode'],
 		'nama' => $rAlternatif['nama'],
-		'c01' => ($rAlternatif['c01'] / sqrt($totalAlternatif['c01'])),
-		'c02' => ($rAlternatif['c02'] / sqrt($totalAlternatif['c02'])),
-		'c03' => ($rAlternatif['c03'] / sqrt($totalAlternatif['c03'])),
-		'c04' => ($rAlternatif['c04'] / sqrt($totalAlternatif['c04'])),
-		'c05' => ($rAlternatif['c05'] / sqrt($totalAlternatif['c05'])),
 	];
+	foreach($kriteria as $rKriteria){
+		$arrNormalisasi[$rKriteria['kode']] = ($rAlternatif[$rKriteria['kode']] / sqrt($totalAlternatif[$rKriteria['kode']]));
+	}
+	$normalisasi[] = $arrNormalisasi;
 }
 
 /** Normalisasi Terbobot */
 $normalisasiTerbobot = [];
 foreach($normalisasi as $rNormalisasi){
-	$normalisasiTerbobot[] = [
+	$arrNormalisasiTerbobot = [
 		'kode' => $rNormalisasi['kode'],
 		'nama' => $rNormalisasi['nama'],
-		'c01' => ($rNormalisasi['c01'] * $kriteria[array_search('c01', array_column($kriteria, 'kode'))]['bobot']),
-		'c02' => ($rNormalisasi['c02'] * $kriteria[array_search('c02', array_column($kriteria, 'kode'))]['bobot']),
-		'c03' => ($rNormalisasi['c03'] * $kriteria[array_search('c03', array_column($kriteria, 'kode'))]['bobot']),
-		'c04' => ($rNormalisasi['c04'] * $kriteria[array_search('c04', array_column($kriteria, 'kode'))]['bobot']),
-		'c05' => ($rNormalisasi['c05'] * $kriteria[array_search('c05', array_column($kriteria, 'kode'))]['bobot']),
 	];
+	foreach($kriteria as $rKriteria){
+		$arrNormalisasiTerbobot[$rKriteria['kode']] = ($rNormalisasi[$rKriteria['kode']] * $kriteria[array_search($rKriteria['kode'], array_column($kriteria, 'kode'))]['bobot']);
+	}
+	$normalisasiTerbobot[] = $arrNormalisasiTerbobot;
 }
 
 /** Matriks Sulusi Ideal */
-/** Positif => (max|benefit), (min|cost) */
-$matriksSolusiIdeal['positif'] = [
-	'c01' => $kriteria[array_search('c01', array_column($kriteria, 'kode'))]['atribut'] == 'benefit' ? max(array_column($normalisasiTerbobot,'c01')) : min(array_column($normalisasiTerbobot,'c01')),
-	'c02' => $kriteria[array_search('c02', array_column($kriteria, 'kode'))]['atribut'] == 'benefit' ? max(array_column($normalisasiTerbobot,'c02')) : min(array_column($normalisasiTerbobot,'c02')),
-	'c03' => $kriteria[array_search('c03', array_column($kriteria, 'kode'))]['atribut'] == 'benefit' ? max(array_column($normalisasiTerbobot,'c03')) : min(array_column($normalisasiTerbobot,'c03')),
-	'c04' => $kriteria[array_search('c04', array_column($kriteria, 'kode'))]['atribut'] == 'benefit' ? max(array_column($normalisasiTerbobot,'c04')) : min(array_column($normalisasiTerbobot,'c04')),
-	'c05' => $kriteria[array_search('c05', array_column($kriteria, 'kode'))]['atribut'] == 'benefit' ? max(array_column($normalisasiTerbobot,'c05')) : min(array_column($normalisasiTerbobot,'c05')),
-];
-/** Negatif => (min|benefit), (max|cost) */
-$matriksSolusiIdeal['negatif'] = [
-	'c01' => $kriteria[array_search('c01', array_column($kriteria, 'kode'))]['atribut'] == 'benefit' ? min(array_column($normalisasiTerbobot,'c01')) : max(array_column($normalisasiTerbobot,'c01')),
-	'c02' => $kriteria[array_search('c02', array_column($kriteria, 'kode'))]['atribut'] == 'benefit' ? min(array_column($normalisasiTerbobot,'c02')) : max(array_column($normalisasiTerbobot,'c02')),
-	'c03' => $kriteria[array_search('c03', array_column($kriteria, 'kode'))]['atribut'] == 'benefit' ? min(array_column($normalisasiTerbobot,'c03')) : max(array_column($normalisasiTerbobot,'c03')),
-	'c04' => $kriteria[array_search('c04', array_column($kriteria, 'kode'))]['atribut'] == 'benefit' ? min(array_column($normalisasiTerbobot,'c04')) : max(array_column($normalisasiTerbobot,'c04')),
-	'c05' => $kriteria[array_search('c05', array_column($kriteria, 'kode'))]['atribut'] == 'benefit' ? min(array_column($normalisasiTerbobot,'c05')) : max(array_column($normalisasiTerbobot,'c05')),
-];
+foreach($kriteria as $rKriteria){
+	/** Positif => (max|benefit), (min|cost) */
+	$matriksSolusiIdeal['positif'][$rKriteria['kode']] = $kriteria[array_search($rKriteria['kode'], array_column($kriteria, 'kode'))]['atribut'] == 'benefit' ? max(array_column($normalisasiTerbobot,$rKriteria['kode'])) : min(array_column($normalisasiTerbobot,$rKriteria['kode']));
+	/** Negatif => (min|benefit), (max|cost) */
+	$matriksSolusiIdeal['negatif'][$rKriteria['kode']] = $kriteria[array_search($rKriteria['kode'], array_column($kriteria, 'kode'))]['atribut'] == 'benefit' ? min(array_column($normalisasiTerbobot,$rKriteria['kode'])) : max(array_column($normalisasiTerbobot,$rKriteria['kode']));
+}
 
 /** Total */
 $total = [];
