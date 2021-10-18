@@ -1,7 +1,4 @@
 <?php
-/**
- * Sumber : https://tugasakhir.id/contoh-perhitungan-spk-metode-topsis/
- */
 
 /** Data */
 $kriteria = [
